@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  --color-zblack: #050505;
+  --color-zsurface: #0d0a14;
+  --color-zcard: #141021;
+  --color-zcard-hover: #1c162f;
+  --color-zborder: #2a1e45;
+  --color-zborder-light: #3e2e66;
+  
+  --color-amethyst: #3B0A6B;
+  --color-amethyst-dark: #220540;
+  --color-amethyst-light: #5c14a3;
+  --color-amethyst-active: #4a0d85;
+
+  --color-cyan: #00E5FF;
+  --color-cyan-hover: #33EBFF;
+  --color-cyan-muted: #00b4c8;
+  --color-cyan-glow: rgba(0, 229, 255, 0.15);
+}
+
+:root {
+  color-scheme: dark;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #050505;
+  color: #f1f0f5;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #050505;
+  color: #f1f0f5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom dark scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a1e45;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3B0A6B;
+}
+
+/* Focus styles for keyboard accessibility */
+*:focus-visible {
+  outline: 2px solid #00E5FF;
+  outline-offset: 2px;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shrinkWidth {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-shrink-width {
+  animation: shrinkWidth 7s linear forwards;
+}
+

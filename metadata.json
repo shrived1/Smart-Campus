@@ -1,0 +1,6 @@
+{
+  "name": "Smart Campus - College ERP & Smart Attendance Platform",
+  "description": "Production-oriented College Management System with Smart Attendance BLE integration, role-based portals for Student, Faculty, Parent, Admission, and Admin.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
