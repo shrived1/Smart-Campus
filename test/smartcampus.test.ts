@@ -397,4 +397,130 @@ describe('Automated Database Indexing & Storage Cleanup Routine Tests', () => {
   });
 });
 
+describe('Production API & Vercel Serverless Handler Integration Tests', () => {
+  it('13. Serves /api/health, /api/auth/login, and ESP32 /api/attendance/* endpoints via api/index.js', async () => {
+    const http = await import('http');
+    const { default: vercelApiHandler } = await import('../api/index.js');
+
+    const server = http.createServer(vercelApiHandler);
+    await new Promise<void>(resolve => server.listen(0, '127.0.0.1', () => resolve()));
+    const address = server.address();
+    const port = typeof address === 'object' && address ? address.port : 0;
+    const baseUrl = `http://127.0.0.1:${port}`;
+
+    try {
+      // 1. Safe health-check endpoint (/api/health and /api)
+      const healthRes = await fetch(`${baseUrl}/api/health`);
+      expect(healthRes.status).toBe(200);
+      const healthJson = await healthRes.json();
+      expect(healthJson.ok).toBe(true);
+      expect(healthJson.status).toBe('HEALTHY');
+
+      // 2. Reject invalid password with 401
+      const badLoginRes = await fetch(`${baseUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: 'alex.rivers@smartcampus.edu', password: 'WrongPassword!' })
+      });
+      expect(badLoginRes.status).toBe(401);
+
+      // 3. Authenticate all 5 roles and verify authoritative redirect URLs
+      const roleCases = [
+        { email: 'alex.rivers@smartcampus.edu', pass: 'Student@2026!', role: 'STUDENT', redirect: '/student/dashboard' },
+        { email: 'prof.sharma@smartcampus.edu', pass: 'Faculty@2026!', role: 'FACULTY', redirect: '/faculty/dashboard' },
+        { email: 'parent.rivers@smartcampus.edu', pass: 'Parent@2026!', role: 'PARENT', redirect: '/parent/dashboard' },
+        { email: 'admission.officer@smartcampus.edu', pass: 'Admission@2026!', role: 'ADMISSION', redirect: '/admission/dashboard' },
+        { email: 'admin@smartcampus.edu', pass: 'Admin@2026!', role: 'ADMIN', redirect: '/admin/dashboard' }
+      ];
+
+      let studentToken = '';
+      let adminToken = '';
+
+      for (const rc of roleCases) {
+        const res = await fetch(`${baseUrl}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier: rc.email, password: rc.pass })
+        });
+        expect(res.status).toBe(200);
+        const data = await res.json();
+        expect(data.success).toBe(true);
+        expect(data.user.role).toBe(rc.role);
+        expect(data.redirectUrl).toBe(rc.redirect);
+        expect(data.token).toMatch(/^sctk_/);
+
+        if (rc.role === 'STUDENT') studentToken = data.token;
+        if (rc.role === 'ADMIN') adminToken = data.token;
+      }
+
+      // 3b. Also verify stripped-prefix path (/auth/login) in case a rewrite strips /api
+      const strippedLoginRes = await fetch(`${baseUrl}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: 'alex.rivers@smartcampus.edu', password: 'Student@2026!' })
+      });
+      expect(strippedLoginRes.status).toBe(200);
+
+      // 4. ESP32 Heartbeat (POST JSON from firmware + GET query from QR onboarding) & BLE Attendance Event
+      const hbPostRes = await fetch(`${baseUrl}/api/attendance/heartbeat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nodeId: 'ESP32-GATE-MAIN-01', signalRssi: -51, batteryLevel: 99 })
+      });
+      expect(hbPostRes.status).toBe(200);
+      const hbPostJson = await hbPostRes.json();
+      expect(hbPostJson.success).toBe(true);
+
+      const hbGetRes = await fetch(`${baseUrl}/api/attendance/heartbeat?nodeId=ESP32-GATE-MAIN-01`);
+      expect(hbGetRes.status).toBe(200);
+
+      const bleScanRes = await fetch(`${baseUrl}/api/attendance/ble-event`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nodeId: 'ESP32-GATE-NORTH-02', bleMac: 'BB:CC:DD:22:33:44', rssi: -56 })
+      });
+      expect(bleScanRes.status).toBe(200);
+      const bleScanJson = await bleScanRes.json();
+      expect(bleScanJson.success).toBe(true);
+      expect(bleScanJson.matched).toBe(true);
+
+      // 5. Simulate Vercel Serverless cold start (in-memory Map wiped on new instance)
+      activeSessions.clear();
+
+      const meRes = await fetch(`${baseUrl}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${studentToken}` }
+      });
+      expect(meRes.status).toBe(200);
+      const meData = await meRes.json();
+      expect(meData.user.role).toBe('STUDENT');
+
+      // 6. Enforce RBAC: Student denied /api/admin/overview (403), Admin allowed (200)
+      const forbiddenRes = await fetch(`${baseUrl}/api/admin/overview`, {
+        headers: { Authorization: `Bearer ${studentToken}` }
+      });
+      expect(forbiddenRes.status).toBe(403);
+
+      const adminOverviewRes = await fetch(`${baseUrl}/api/admin/overview`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      expect(adminOverviewRes.status).toBe(200);
+
+      // 7. Logout revokes token
+      const logoutRes = await fetch(`${baseUrl}/api/auth/logout`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${studentToken}` }
+      });
+      expect(logoutRes.status).toBe(200);
+
+      const afterLogoutRes = await fetch(`${baseUrl}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${studentToken}` }
+      });
+      expect(afterLogoutRes.status).toBe(401);
+    } finally {
+      await new Promise<void>(resolve => server.close(() => resolve()));
+    }
+  });
+});
+
+
 

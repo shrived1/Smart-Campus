@@ -1,7 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
+import { Buffer } from 'buffer';
 import { db } from './db.js';
-import { User, UserRole } from './types.js';
+import type { User, UserRole } from './types.js';
 
 export interface AuthSession {
   token: string;
@@ -16,11 +17,108 @@ export interface AuthSession {
   expiresAt: number;
 }
 
-// In-memory active session store
+interface SignedTokenPayload {
+  u: string;
+  e: string;
+  r: UserRole;
+  n: string;
+  sid?: string;
+  fid?: string;
+  pid?: string;
+  lsid?: string;
+  exp: number;
+  jti: string;
+}
+
+// In-memory active session store & revocation set
 export const activeSessions = new Map<string, AuthSession>();
+const revokedTokens = new Set<string>();
+
+function getSessionSecret(): string {
+  if (process.env.SESSION_SECRET && process.env.SESSION_SECRET.trim().length > 0) {
+    return process.env.SESSION_SECRET.trim();
+  }
+  // Deterministic fallback derived from seeded user credentials so serverless cold-starts verify tokens consistently when SESSION_SECRET is unset
+  const seedMaterial = db.users.map(u => `${u.id}:${u.passwordHash}`).join('|') || 'smartcampus-fallback-hmac-key';
+  return crypto.createHash('sha256').update(seedMaterial).digest('hex');
+}
+
+function signPayload(payloadB64: string): string {
+  return crypto.createHmac('sha256', getSessionSecret()).update(payloadB64).digest('hex');
+}
+
+export function verifySignedSessionToken(token: string): AuthSession | null {
+  if (!token.startsWith('sctk_') || revokedTokens.has(token)) {
+    return null;
+  }
+
+  const rawBody = token.slice(5);
+  const dotIndex = rawBody.indexOf('.');
+  if (dotIndex <= 0) {
+    return null;
+  }
+
+  const payloadB64 = rawBody.slice(0, dotIndex);
+  const providedSig = rawBody.slice(dotIndex + 1);
+  const expectedSig = signPayload(payloadB64);
+
+  if (providedSig.length !== expectedSig.length) {
+    return null;
+  }
+
+  const isValidSig = crypto.timingSafeEqual(
+    Buffer.from(providedSig, 'utf8'),
+    Buffer.from(expectedSig, 'utf8')
+  );
+  if (!isValidSig) {
+    return null;
+  }
+
+  try {
+    const decoded = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8')) as SignedTokenPayload;
+    if (!decoded || !decoded.u || !decoded.r || !decoded.exp) {
+      return null;
+    }
+    if (Date.now() > decoded.exp) {
+      return null;
+    }
+
+    return {
+      token,
+      userId: decoded.u,
+      email: decoded.e,
+      role: decoded.r,
+      name: decoded.n,
+      studentId: decoded.sid,
+      facultyId: decoded.fid,
+      parentId: decoded.pid,
+      linkedStudentId: decoded.lsid,
+      expiresAt: decoded.exp
+    };
+  } catch {
+    return null;
+  }
+}
 
 export function createSessionToken(user: User): AuthSession {
-  const token = "sctk_" + crypto.randomBytes(32).toString('hex');
+  const expiresAt = Date.now() + 1000 * 60 * 60 * 24; // 24 hours
+  const payload: SignedTokenPayload = {
+    u: user.id,
+    e: user.email,
+    r: user.role,
+    n: user.name,
+    sid: user.studentId,
+    fid: user.facultyId,
+    pid: user.parentId,
+    lsid: user.linkedStudentId,
+    exp: expiresAt,
+    jti: crypto.randomBytes(12).toString('hex')
+  };
+
+  const payloadB64 = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
+  const signature = signPayload(payloadB64);
+  const token = `sctk_${payloadB64}.${signature}`;
+
   const session: AuthSession = {
     token,
     userId: user.id,
@@ -31,13 +129,14 @@ export function createSessionToken(user: User): AuthSession {
     facultyId: user.facultyId,
     parentId: user.parentId,
     linkedStudentId: user.linkedStudentId,
-    expiresAt: Date.now() + 1000 * 60 * 60 * 24 // 24 hours
+    expiresAt
   };
   activeSessions.set(token, session);
   return session;
 }
 
 export function revokeSession(token: string): boolean {
+  revokedTokens.add(token);
   return activeSessions.delete(token);
 }
 
@@ -54,7 +153,21 @@ export function authenticateSession(req: AuthenticatedRequest, res: Response, ne
   }
 
   const token = authHeader.split(' ')[1];
-  const session = activeSessions.get(token);
+  if (revokedTokens.has(token)) {
+    activeSessions.delete(token);
+    res.status(401).json({ success: false, error: "Session expired or invalid. Please log in again." });
+    return;
+  }
+
+  let session: AuthSession | null | undefined = activeSessions.get(token);
+
+  // Stateless cryptographic fallback for serverless horizontal scaling / cold starts (e.g. Vercel Functions)
+  if (!session) {
+    session = verifySignedSessionToken(token);
+    if (session) {
+      activeSessions.set(token, session);
+    }
+  }
 
   if (!session) {
     res.status(401).json({ success: false, error: "Session expired or invalid. Please log in again." });

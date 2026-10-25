@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db.js';
-import { authenticateSession, requireRole, AuthenticatedRequest } from '../auth.js';
+import { authenticateSession, requireRole, type AuthenticatedRequest } from '../auth.js';
 
 const router = Router();
 

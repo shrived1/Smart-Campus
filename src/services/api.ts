@@ -1,4 +1,9 @@
-const API_BASE = '/api';
+const rawApiBase = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
+export const API_BASE = rawApiBase
+  ? rawApiBase.replace(/\/+$/, '').endsWith('/api')
+    ? rawApiBase.replace(/\/+$/, '')
+    : `${rawApiBase.replace(/\/+$/, '')}/api`
+  : '/api';
 
 export function getStoredToken(): string | null {
   return localStorage.getItem('smartcampus_token');
@@ -28,10 +33,17 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     headers,
   });
 
-  const data = await response.json().catch(() => ({}));
+  const contentType = response.headers.get('content-type') || '';
+  const data = contentType.includes('application/json')
+    ? await response.json().catch(() => ({}))
+    : {};
 
   if (!response.ok) {
-    const errorMsg = data?.error || `Request failed with status ${response.status}`;
+    const errorMsg =
+      data?.error ||
+      (response.status === 404
+        ? `API endpoint not found (404): ${API_BASE}${endpoint}`
+        : `Request failed with status ${response.status}`);
     throw new Error(errorMsg);
   }
 

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db, hashPassword } from '../db.js';
-import { authenticateSession, requireRole, AuthenticatedRequest } from '../auth.js';
+import { authenticateSession, requireRole, type AuthenticatedRequest } from '../auth.js';
 
 export interface MaintenanceStepResult {
   step: number;

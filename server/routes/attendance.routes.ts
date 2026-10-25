@@ -1,7 +1,7 @@
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { db } from '../db.js';
-import { authenticateSession, requireRole, AuthenticatedRequest } from '../auth.js';
-import { BLEAttendanceEvent, AttendanceDayRecord } from '../types.js';
+import { authenticateSession, requireRole, type AuthenticatedRequest } from '../auth.js';
+import type { BLEAttendanceEvent, AttendanceDayRecord } from '../types.js';
 
 const router = Router();
 
@@ -18,9 +18,10 @@ function updateDeviceStatuses() {
   }
 }
 
-// 1. ESP32 Node Heartbeat endpoint
-router.post('/heartbeat', (req, res) => {
-  const { nodeId, firmwareVersion, ipAddress, macAddress, signalRssi, batteryLevel } = req.body;
+// 1. ESP32 Node Heartbeat endpoint (supports POST JSON from ESP32 firmware and GET query from QR onboarding)
+const handleHeartbeat = (req: Request, res: Response) => {
+  const payload = { ...(req.query as Record<string, any>), ...(req.body as Record<string, any>) };
+  const { nodeId, firmwareVersion, ipAddress, macAddress, signalRssi, batteryLevel } = payload;
 
   if (!nodeId) {
     res.status(400).json({ success: false, error: 'nodeId is required' });
@@ -66,7 +67,10 @@ router.post('/heartbeat', (req, res) => {
       thresholdPercent: db.settings.attendanceThresholdPercent
     }
   });
-});
+};
+
+router.post('/heartbeat', handleHeartbeat);
+router.get('/heartbeat', handleHeartbeat);
 
 // 2. ESP32 BLE Detection Event ingestion endpoint
 router.post('/ble-event', (req, res) => {
