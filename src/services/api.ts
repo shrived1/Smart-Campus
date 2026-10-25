@@ -1,53 +1,47 @@
-const rawApiBase = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
-export const API_BASE = rawApiBase
-  ? rawApiBase.replace(/\/+$/, '').endsWith('/api')
-    ? rawApiBase.replace(/\/+$/, '')
-    : `${rawApiBase.replace(/\/+$/, '')}/api`
-  : '/api';
+import {
+  apiRequest,
+  type ApiRequestOptions,
+} from '../lib/api.js';
 
-export function getStoredToken(): string | null {
-  return localStorage.getItem('smartcampus_token');
-}
+export {
+  API_BASE,
+  AUTH_TOKEN_STORAGE_KEY,
+  ApiRequestError,
+  PRODUCTION_API_ORIGIN,
+  addRequestInterceptor,
+  addResponseInterceptor,
+  apiClient,
+  apiLogger,
+  apiRequest,
+  buildApiUrl,
+  clearApiFailureLogs,
+  configureApiInterceptor,
+  configureApiLogger,
+  getApiBaseOrigin,
+  getApiFailureLogs,
+  getStoredToken,
+  isProtectedPortalPathname,
+  logApiFailure,
+  normalizeApiBase,
+  redactSensitiveData,
+  resetApiInterceptor,
+  resolveActiveAuthToken,
+  resolveFullDiagnosticUrl,
+  resolveRuntimeApiOrigin,
+  sanitizeEnvApiOrigin,
+  setApiBaseOrigin,
+  setInterceptorAuthToken,
+  setStoredToken,
+  type ApiErrorCode,
+  type ApiFailureLogEntry,
+  type ApiInterceptorConfig,
+  type ApiLoggerConfig,
+  type ApiRequestOptions,
+  type UnauthorizedContext,
+} from '../lib/api.js';
 
-export function setStoredToken(token: string | null) {
-  if (token) {
-    localStorage.setItem('smartcampus_token', token);
-  } else {
-    localStorage.removeItem('smartcampus_token');
-  }
-}
-
-async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const token = getStoredToken();
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string>),
-  };
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers,
-  });
-
-  const contentType = response.headers.get('content-type') || '';
-  const data = contentType.includes('application/json')
-    ? await response.json().catch(() => ({}))
-    : {};
-
-  if (!response.ok) {
-    const errorMsg =
-      data?.error ||
-      (response.status === 404
-        ? `API endpoint not found (404): ${API_BASE}${endpoint}`
-        : `Request failed with status ${response.status}`);
-    throw new Error(errorMsg);
-  }
-
-  return data as T;
+function request<T>(endpoint: string, options: ApiRequestOptions = {}): Promise<T> {
+  return apiRequest<T>(endpoint, options);
 }
 
 export const api = {
@@ -56,17 +50,33 @@ export const api = {
     request<{ success: boolean; token: string; user: any; redirectUrl: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ identifier, password }),
+      skipAuth: true,
+      skipUnauthorizedHandler: true,
+    }),
+  demoLogin: (role: string) =>
+    request<{ success: boolean; token: string; user: any; redirectUrl: string }>('/auth/demo-login', {
+      method: 'POST',
+      body: JSON.stringify({ role }),
+      skipAuth: true,
+      skipUnauthorizedHandler: true,
     }),
   getMe: () => request<{ success: boolean; user: any }>('/auth/me'),
   logout: () =>
     request<{ success: boolean }>('/auth/logout', {
       method: 'POST',
+      skipUnauthorizedHandler: true,
     }),
-  getDemoAccounts: () => request<{ success: boolean; accounts: any[] }>('/auth/demo-accounts'),
+  getDemoAccounts: () =>
+    request<{ success: boolean; demoAuthEnabled: boolean; demoAdminEnabled: boolean; accounts: any[] }>(
+      '/auth/demo-accounts',
+      { skipAuth: true }
+    ),
   forgotPassword: (email: string) =>
     request<{ success: boolean; message: string }>('/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify({ email }),
+      skipAuth: true,
+      skipUnauthorizedHandler: true,
     }),
 
   // Public

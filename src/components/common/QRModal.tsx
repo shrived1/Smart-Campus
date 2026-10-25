@@ -97,7 +97,7 @@ export const QRModal: React.FC<QRModalProps> = ({
                 <div className="w-8 h-8 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin" />
               </div>
             ) : qrDataUrl ? (
-              <div className="p-3 bg-[#050505] rounded-xl border border-[#3B0A6B] shadow-[0_0_20px_rgba(59,10,107,0.3)]">
+              <div className="sc-qr-frame p-3 bg-[#050505] rounded-xl border border-[#3B0A6B] shadow-[0_0_20px_rgba(59,10,107,0.3)]">
                 <img
                   src={qrDataUrl}
                   alt="Workflow QR Code"

@@ -14,6 +14,7 @@ import {
   FileText
 } from 'lucide-react';
 import QRModal from '../../components/common/QRModal.js';
+import ThemeToggle from '../../components/common/ThemeToggle.js';
 
 export const LandingPage: React.FC = () => {
   const [collegeInfo, setCollegeInfo] = useState<any>(null);
@@ -46,7 +47,9 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-2.5 sm:gap-3.5">
+          <ThemeToggle />
+
           <button
             onClick={() => setShowQR(true)}
             className="hidden sm:flex items-center gap-2 py-2 px-3.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-[#141021] hover:bg-[#1c162f] border border-[#2a1e45] transition-all"

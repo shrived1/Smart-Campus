@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Link, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
 import { UserRole } from '../types/index.js';
 import Sidebar from '../components/common/Sidebar.js';
@@ -48,12 +48,12 @@ export const PortalLayout: React.FC<PortalLayoutProps> = ({ allowedRoles, portal
           <p className="text-xs text-slate-400 mb-6">
             Your current account role is <span className="text-[#00E5FF] font-mono">{user.role}</span>. You do not have permission to access the <span className="text-white font-medium">{portalTitle}</span>.
           </p>
-          <a
-            href={targetHome}
+          <Link
+            to={targetHome}
             className="inline-block py-2.5 px-6 rounded-xl text-xs font-semibold bg-[#3B0A6B] hover:bg-[#5c14a3] text-white transition-all border border-[#5c14a3]"
           >
             Go to My {user.role} Dashboard
-          </a>
+          </Link>
         </div>
       </div>
     );

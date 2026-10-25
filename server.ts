@@ -23,7 +23,7 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const bundledServerPath = path.resolve(__dirname, 'api/_server.js');
+    const bundledServerPath = path.resolve(__dirname, 'api/_app.js');
     if (fs.existsSync(bundledServerPath)) {
       const mod = await import(pathToFileURL(bundledServerPath).href);
       app = mod.createApp();

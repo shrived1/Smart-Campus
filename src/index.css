@@ -7,7 +7,7 @@
   --color-zcard-hover: #1c162f;
   --color-zborder: #2a1e45;
   --color-zborder-light: #3e2e66;
-  
+
   --color-amethyst: #3B0A6B;
   --color-amethyst-dark: #220540;
   --color-amethyst-light: #5c14a3;
@@ -19,33 +19,83 @@
   --color-cyan-glow: rgba(0, 229, 255, 0.15);
 }
 
-:root {
+:root,
+[data-theme="dark"] {
   color-scheme: dark;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #050505;
-  color: #f1f0f5;
+  --sc-bg-canvas: #050505;
+  --sc-bg-surface: #0d0a14;
+  --sc-bg-card: #141021;
+  --sc-bg-card-hover: #1c162f;
+  --sc-border: #2a1e45;
+  --sc-border-strong: #3e2e66;
+  --sc-text-primary: #f1f0f5;
+  --sc-text-secondary: #cbd5e1;
+  --sc-text-muted: #94a3b8;
+  --sc-accent-cyan: #00E5FF;
+  --sc-scrollbar-track: #050505;
+  --sc-scrollbar-thumb: #2a1e45;
+  --sc-focus-ring: #00E5FF;
+  background-color: var(--sc-bg-canvas);
+  color: var(--sc-text-primary);
+}
+
+/* ==========================================================================
+   High-Contrast Light Mode Token Overrides & Tailwind Color Mapping
+   Ensures WCAG AA/AAA contrast across all surfaces, borders, text, and badges
+   ========================================================================== */
+[data-theme="light"] {
+  color-scheme: light;
+  --color-zblack: #f8fafc;
+  --color-zsurface: #f1f5f9;
+  --color-zcard: #ffffff;
+  --color-zcard-hover: #e2e8f0;
+  --color-zborder: #94a3b8;
+  --color-zborder-light: #64748b;
+
+  --color-cyan: #0e7490;
+  --color-cyan-hover: #0369a1;
+  --color-cyan-muted: #155e75;
+  --color-cyan-glow: rgba(14, 116, 144, 0.14);
+
+  --sc-bg-canvas: #f8fafc;
+  --sc-bg-surface: #f1f5f9;
+  --sc-bg-card: #ffffff;
+  --sc-bg-card-hover: #e2e8f0;
+  --sc-border: #94a3b8;
+  --sc-border-strong: #64748b;
+  --sc-text-primary: #0f172a;
+  --sc-text-secondary: #1e293b;
+  --sc-text-muted: #334155;
+  --sc-accent-cyan: #0e7490;
+  --sc-scrollbar-track: #f1f5f9;
+  --sc-scrollbar-thumb: #94a3b8;
+  --sc-focus-ring: #0e7490;
+  background-color: var(--sc-bg-canvas);
+  color: var(--sc-text-primary);
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: #050505;
-  color: #f1f0f5;
+  background-color: var(--sc-bg-canvas);
+  color: var(--sc-text-primary);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Custom dark scrollbar */
+/* Custom theme-aware scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #050505;
+  background: var(--sc-scrollbar-track);
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a1e45;
+  background: var(--sc-scrollbar-thumb);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -54,8 +104,356 @@ body {
 
 /* Focus styles for keyboard accessibility */
 *:focus-visible {
-  outline: 2px solid #00E5FF;
+  outline: 2px solid var(--sc-focus-ring);
   outline-offset: 2px;
+}
+
+/* 1. Canvas, Sticky Navigation, Sidebar, and Elevated Card Surfaces */
+[data-theme="light"] .bg-\[\#050505\],
+[data-theme="light"] .bg-\[\#0a0712\] {
+  background-color: #f8fafc;
+}
+
+[data-theme="light"] aside.bg-\[\#050505\] {
+  background-color: #ffffff;
+}
+
+[data-theme="light"] .bg-\[\#050505\]\/95,
+[data-theme="light"] .bg-\[\#0a0712\]\/95,
+[data-theme="light"] .bg-\[\#050505\]\/90,
+[data-theme="light"] .bg-\[\#050505\]\/80 {
+  background-color: rgba(255, 255, 255, 0.96);
+}
+
+[data-theme="light"] .bg-\[\#050505\]\/50 {
+  background-color: rgba(241, 245, 249, 0.9);
+}
+
+[data-theme="light"] .bg-\[\#0c0a13\],
+[data-theme="light"] .bg-\[\#0d0a14\],
+[data-theme="light"] .bg-\[\#0d0a17\],
+[data-theme="light"] .bg-\[\#0e0a19\] {
+  background-color: #f1f5f9;
+}
+
+[data-theme="light"] .bg-\[\#141021\] {
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="light"] .bg-\[\#141021\] .bg-\[\#050505\] {
+  background-color: #f8fafc;
+}
+
+/* Preserve dark high-contrast frame directly behind cyan-on-black QR PNGs */
+[data-theme="light"] .sc-qr-frame.bg-\[\#050505\] {
+  background-color: #050505;
+}
+
+/* Form controls (inputs, selects, textareas) — crisp white surface + high-contrast border */
+[data-theme="light"] input.bg-\[\#050505\],
+[data-theme="light"] select.bg-\[\#050505\],
+[data-theme="light"] textarea.bg-\[\#050505\],
+[data-theme="light"] .bg-\[\#141021\] input.bg-\[\#050505\],
+[data-theme="light"] .bg-\[\#141021\] select.bg-\[\#050505\],
+[data-theme="light"] .bg-\[\#141021\] textarea.bg-\[\#050505\] {
+  background-color: #ffffff;
+  border-color: #64748b;
+  color: #0f172a;
+}
+
+[data-theme="light"] input.bg-\[\#050505\]:focus,
+[data-theme="light"] select.bg-\[\#050505\]:focus,
+[data-theme="light"] textarea.bg-\[\#050505\]:focus {
+  border-color: #0e7490;
+  box-shadow: 0 0 0 2px rgba(14, 116, 144, 0.2);
+}
+
+[data-theme="light"] .bg-\[\#2a1e45\] {
+  background-color: #94a3b8;
+}
+
+[data-theme="light"] .bg-slate-600 {
+  background-color: #64748b;
+}
+
+/* Interactive Hover Surfaces */
+[data-theme="light"] .hover\:bg-\[\#141021\]:hover,
+[data-theme="light"] .hover\:bg-\[\#141021\]\/60:hover,
+[data-theme="light"] .hover\:bg-\[\#1a142e\]:hover,
+[data-theme="light"] .hover\:bg-\[\#1c162f\]:hover,
+[data-theme="light"] .hover\:bg-\[\#1c162f\]\/40:hover {
+  background-color: #e2e8f0;
+}
+
+/* Modal & Drawer Backdrops */
+[data-theme="light"] .bg-black\/80 {
+  background-color: rgba(15, 23, 42, 0.55);
+}
+
+[data-theme="light"] .bg-black\/40 {
+  background-color: rgba(15, 23, 42, 0.3);
+}
+
+/* 2. Banner & Display Gradients */
+[data-theme="light"] .bg-gradient-to-r.from-\[\#141021\] {
+  background-image: linear-gradient(to right, #ffffff, #f8fafc, rgba(59, 10, 107, 0.09));
+}
+
+[data-theme="light"] .bg-clip-text.from-white {
+  background-image: linear-gradient(to right, #3B0A6B, #5b21b6, #0e7490);
+}
+
+/* Tinted Royal Amethyst Surfaces (Soft Violet Wash with Crisp Contrast) */
+[data-theme="light"] .bg-\[\#3B0A6B\]\/20,
+[data-theme="light"] .bg-\[\#3B0A6B\]\/25,
+[data-theme="light"] .bg-\[\#3B0A6B\]\/30,
+[data-theme="light"] .bg-\[\#3B0A6B\]\/40,
+[data-theme="light"] .bg-\[\#3B0A6B\]\/50,
+[data-theme="light"] .bg-\[\#3B0A6B\]\/60 {
+  background-color: rgba(91, 33, 182, 0.11);
+}
+
+/* 3. High-Contrast Structural Borders, Dividers & Rings */
+[data-theme="light"] .border-\[\#2a1e45\],
+[data-theme="light"] .border-\[\#2a1e45\]\/80,
+[data-theme="light"] .border-\[\#2a1e45\]\/60,
+[data-theme="light"] .border-\[\#2a1e45\]\/50,
+[data-theme="light"] .border-slate-700 {
+  border-color: #94a3b8;
+}
+
+[data-theme="light"] header.border-\[\#2a1e45\],
+[data-theme="light"] aside.border-\[\#2a1e45\],
+[data-theme="light"] footer.border-\[\#2a1e45\],
+[data-theme="light"] section.border-\[\#2a1e45\] {
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .divide-\[\#2a1e45\]\/50 > :not(:last-child) {
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .border-\[\#3B0A6B\],
+[data-theme="light"] .border-\[\#3B0A6B\]\/70,
+[data-theme="light"] .border-\[\#3B0A6B\]\/50,
+[data-theme="light"] .border-\[\#5c14a3\],
+[data-theme="light"] .hover\:border-\[\#3B0A6B\]:hover {
+  border-color: #5b21b6;
+}
+
+[data-theme="light"] .border-\[\#00E5FF\],
+[data-theme="light"] .border-\[\#00E5FF\]\/50,
+[data-theme="light"] .border-\[\#00E5FF\]\/40,
+[data-theme="light"] .border-\[\#00E5FF\]\/30,
+[data-theme="light"] .border-cyan-500\/30,
+[data-theme="light"] .border-cyan-500\/40,
+[data-theme="light"] .hover\:border-\[\#00E5FF\]\/30:hover,
+[data-theme="light"] .hover\:border-\[\#00E5FF\]\/50:hover,
+[data-theme="light"] .hover\:border-\[\#00E5FF\]\/60:hover,
+[data-theme="light"] .focus\:border-\[\#00E5FF\]:focus {
+  border-color: #0e7490;
+}
+
+[data-theme="light"] .ring-\[\#050505\] {
+  --tw-ring-color: #ffffff;
+}
+
+/* 4. High-Contrast Typography Mapping (WCAG AAA 10:1 - 17:1) */
+[data-theme="light"] .text-white,
+[data-theme="light"] .text-slate-100 {
+  color: #0f172a;
+}
+
+[data-theme="light"] .text-slate-200,
+[data-theme="light"] .text-slate-300 {
+  color: #1e293b;
+}
+
+[data-theme="light"] .text-slate-400,
+[data-theme="light"] .text-slate-500,
+[data-theme="light"] .text-\[\#94a3b8\] {
+  color: #334155;
+}
+
+[data-theme="light"] .text-slate-600 {
+  color: #475569;
+}
+
+[data-theme="light"] .hover\:text-white:hover,
+[data-theme="light"] .hover\:text-slate-200:hover {
+  color: #0f172a;
+}
+
+[data-theme="light"] .placeholder-slate-400::placeholder,
+[data-theme="light"] .placeholder-slate-500::placeholder {
+  color: #64748b;
+}
+
+[data-theme="light"] .selection\:bg-\[\#00E5FF\]\/30 ::selection,
+[data-theme="light"] .selection\:bg-\[\#00E5FF\]\/30::selection {
+  background-color: rgba(14, 116, 144, 0.22);
+  color: #0f172a;
+}
+
+/* 5. High-Contrast Accent & Semantic Status Palette */
+[data-theme="light"] .text-\[\#00E5FF\],
+[data-theme="light"] .text-cyan-400,
+[data-theme="light"] .hover\:text-\[\#00E5FF\]:hover {
+  color: #0e7490;
+}
+
+[data-theme="light"] .bg-\[\#00E5FF\],
+[data-theme="light"] .peer:checked ~ .peer-checked\:bg-\[\#00E5FF\] {
+  background-color: #0284c7;
+}
+
+[data-theme="light"] .bg-\[\#00E5FF\]\/10,
+[data-theme="light"] .bg-\[\#00E5FF\]\/15,
+[data-theme="light"] .bg-\[\#00E5FF\]\/20,
+[data-theme="light"] .bg-cyan-500\/10,
+[data-theme="light"] .bg-cyan-500\/20,
+[data-theme="light"] .bg-cyan-950\/60 {
+  background-color: #e0f2fe;
+}
+
+[data-theme="light"] .hover\:bg-\[\#00E5FF\]\/30:hover {
+  background-color: #bae6fd;
+}
+
+/* Emerald (Success / Active / Verified) */
+[data-theme="light"] .text-emerald-400,
+[data-theme="light"] .text-emerald-300 {
+  color: #047857;
+}
+
+[data-theme="light"] .bg-emerald-400 {
+  background-color: #059669;
+}
+
+[data-theme="light"] .bg-emerald-500\/10,
+[data-theme="light"] .bg-emerald-500\/20 {
+  background-color: #d1fae5;
+}
+
+[data-theme="light"] .border-emerald-500\/20,
+[data-theme="light"] .border-emerald-500\/30,
+[data-theme="light"] .border-emerald-500\/40,
+[data-theme="light"] .border-emerald-500\/50 {
+  border-color: #059669;
+}
+
+/* Amber (Warning / Pending / Threshold Risk) */
+[data-theme="light"] .text-amber-400,
+[data-theme="light"] .text-amber-400\/80,
+[data-theme="light"] .text-amber-300,
+[data-theme="light"] .text-amber-200,
+[data-theme="light"] .hover\:text-amber-300:hover {
+  color: #b45309;
+}
+
+[data-theme="light"] .bg-amber-500\/5,
+[data-theme="light"] .bg-amber-500\/10,
+[data-theme="light"] .bg-amber-500\/20,
+[data-theme="light"] .bg-amber-950\/60 {
+  background-color: #fef3c7;
+}
+
+[data-theme="light"] .hover\:bg-amber-500\/10:hover,
+[data-theme="light"] .hover\:bg-amber-500\/20:hover,
+[data-theme="light"] .hover\:bg-amber-500\/30:hover {
+  background-color: #fde68a;
+}
+
+[data-theme="light"] .border-amber-500\/30,
+[data-theme="light"] .border-amber-500\/40,
+[data-theme="light"] .border-amber-500\/50,
+[data-theme="light"] .hover\:border-amber-500\/30:hover {
+  border-color: #d97706;
+}
+
+/* Rose & Red (Critical / Error / Sign Out / Rejected) */
+[data-theme="light"] .text-rose-400,
+[data-theme="light"] .text-rose-300,
+[data-theme="light"] .text-red-400\/80,
+[data-theme="light"] .text-red-300,
+[data-theme="light"] .hover\:text-red-300:hover {
+  color: #be123c;
+}
+
+[data-theme="light"] .bg-rose-400,
+[data-theme="light"] .bg-red-400 {
+  background-color: #e11d48;
+}
+
+[data-theme="light"] .bg-rose-500\/10,
+[data-theme="light"] .bg-rose-500\/20,
+[data-theme="light"] .bg-red-500\/5,
+[data-theme="light"] .bg-red-500\/20,
+[data-theme="light"] .bg-red-950\/60,
+[data-theme="light"] .hover\:bg-rose-500\/10:hover,
+[data-theme="light"] .hover\:bg-rose-500\/20:hover,
+[data-theme="light"] .hover\:bg-red-500\/10:hover {
+  background-color: #ffe4e6;
+}
+
+[data-theme="light"] .border-rose-500\/30,
+[data-theme="light"] .border-rose-500\/40,
+[data-theme="light"] .border-rose-500\/50,
+[data-theme="light"] .border-red-500\/30,
+[data-theme="light"] .border-red-500\/40,
+[data-theme="light"] .border-red-500\/50,
+[data-theme="light"] .hover\:border-red-500\/30:hover {
+  border-color: #e11d48;
+}
+
+/* Violet / Telemetry Series Accents */
+[data-theme="light"] .text-purple-400,
+[data-theme="light"] .text-purple-300,
+[data-theme="light"] .text-\[\#c084fc\],
+[data-theme="light"] .text-\[\#9d4edd\] {
+  color: #6d28d9;
+}
+
+[data-theme="light"] .bg-\[\#c084fc\],
+[data-theme="light"] .bg-\[\#9d4edd\] {
+  background-color: #6d28d9;
+}
+
+[data-theme="light"] .border-\[\#c084fc\] {
+  border-color: #6d28d9;
+}
+
+/* 6. Preserve Crisp White & Vivid Cyan Inside Solid Dark / Primary CTA Elements */
+[data-theme="light"] .bg-\[\#3B0A6B\],
+[data-theme="light"] .bg-\[\#3B0A6B\].text-white,
+[data-theme="light"] .bg-\[\#3B0A6B\] .text-white,
+[data-theme="light"] .from-\[\#3B0A6B\].text-white,
+[data-theme="light"] .from-\[\#3B0A6B\] .text-white,
+[data-theme="light"] .bg-emerald-500\/90,
+[data-theme="light"] .bg-emerald-500\/90 .text-white,
+[data-theme="light"] .sc-theme-toggle.bg-slate-900,
+[data-theme="light"] .sc-theme-toggle.bg-slate-900 span {
+  color: #ffffff;
+}
+
+[data-theme="light"] .bg-emerald-500\/90 {
+  background-color: #047857;
+}
+
+[data-theme="light"] .hover\:bg-\[\#5c14a3\]:hover,
+[data-theme="light"] .hover\:bg-\[\#5c14a3\]:hover.text-white,
+[data-theme="light"] .hover\:bg-\[\#5c14a3\]:hover .text-white {
+  background-color: #4c1d95;
+  color: #ffffff;
+}
+
+[data-theme="light"] .bg-\[\#3B0A6B\] .text-\[\#00E5FF\],
+[data-theme="light"] .from-\[\#3B0A6B\].text-\[\#00E5FF\],
+[data-theme="light"] .from-\[\#3B0A6B\] .text-\[\#00E5FF\],
+[data-theme="light"] .hover\:bg-\[\#5c14a3\]:hover.text-\[\#00E5FF\],
+[data-theme="light"] .hover\:bg-\[\#5c14a3\]:hover .text-\[\#00E5FF\] {
+  color: #67e8f9;
 }
 
 @keyframes slideUp {
@@ -85,4 +483,3 @@ body {
 .animate-shrink-width {
   animation: shrinkWidth 7s linear forwards;
 }
-

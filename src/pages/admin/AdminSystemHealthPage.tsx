@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../../services/api.js';
+import { useTheme } from '../../context/ThemeContext.js';
 import { 
   Activity, 
   Database, 
@@ -90,6 +91,7 @@ const DEFAULT_THRESHOLDS: AlertThresholds = {
 };
 
 export const AdminSystemHealthPage: React.FC = () => {
+  const { isLightMode } = useTheme();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -1261,24 +1263,24 @@ export const AdminSystemHealthPage: React.FC = () => {
               <AreaChart data={uptimeHistory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="latencyGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#00E5FF" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#00E5FF" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor={isLightMode ? '#0284c7' : '#00E5FF'} stopOpacity={isLightMode ? 0.28 : 0.4} />
+                    <stop offset="95%" stopColor={isLightMode ? '#0284c7' : '#00E5FF'} stopOpacity={0.0} />
                   </linearGradient>
                   <linearGradient id="reqGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3B0A6B" stopOpacity={0.5} />
-                    <stop offset="95%" stopColor="#3B0A6B" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor={isLightMode ? '#6d28d9' : '#3B0A6B'} stopOpacity={isLightMode ? 0.25 : 0.5} />
+                    <stop offset="95%" stopColor={isLightMode ? '#6d28d9' : '#3B0A6B'} stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2a1e45" opacity={0.6} />
+                <CartesianGrid strokeDasharray="3 3" stroke={isLightMode ? '#cbd5e1' : '#2a1e45'} opacity={isLightMode ? 0.9 : 0.6} />
                 <XAxis 
                   dataKey="time" 
-                  stroke="#64748b" 
+                  stroke={isLightMode ? '#475569' : '#64748b'} 
                   fontSize={10} 
                   tickLine={false} 
                   interval={3}
                 />
                 <YAxis 
-                  stroke="#64748b" 
+                  stroke={isLightMode ? '#475569' : '#64748b'} 
                   fontSize={10} 
                   tickLine={false}
                 />
@@ -1288,7 +1290,7 @@ export const AdminSystemHealthPage: React.FC = () => {
                   dataKey="latencyMs"
                   name="Current Latency"
                   unit="ms"
-                  stroke="#00E5FF"
+                  stroke={isLightMode ? '#0284c7' : '#00E5FF'}
                   strokeWidth={2}
                   fillOpacity={1}
                   fill="url(#latencyGradient)"
@@ -1298,7 +1300,7 @@ export const AdminSystemHealthPage: React.FC = () => {
                   dataKey="requestsPerMin"
                   name="Current Traffic"
                   unit="req/min"
-                  stroke="#9d4edd"
+                  stroke={isLightMode ? '#6d28d9' : '#9d4edd'}
                   strokeWidth={1.5}
                   fillOpacity={1}
                   fill="url(#reqGradient)"
@@ -1310,11 +1312,11 @@ export const AdminSystemHealthPage: React.FC = () => {
                       dataKey="prevWeekLatencyMs"
                       name="Prev Week Latency"
                       unit="ms"
-                      stroke="#c084fc"
+                      stroke={isLightMode ? '#7c3aed' : '#c084fc'}
                       strokeWidth={2}
                       strokeDasharray="4 4"
                       dot={false}
-                      activeDot={{ r: 4, stroke: '#c084fc', strokeWidth: 2, fill: '#050505' }}
+                      activeDot={{ r: 4, stroke: isLightMode ? '#7c3aed' : '#c084fc', strokeWidth: 2, fill: isLightMode ? '#ffffff' : '#050505' }}
                     />
                     <Line
                       type="monotone"
@@ -1363,7 +1365,7 @@ export const AdminSystemHealthPage: React.FC = () => {
                   dataKey="sizeGB"
                 >
                   {storage?.breakdown?.map((entry: any, index: number) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} stroke="#141021" strokeWidth={2} />
+                    <Cell key={`cell-${index}`} fill={entry.color} stroke={isLightMode ? '#ffffff' : '#141021'} strokeWidth={2} />
                   ))}
                 </Pie>
                 <Tooltip

@@ -1,4 +1,4 @@
-import { createApp } from './_server.js';
+import { createApp } from './_app.js';
 
 const app = createApp({ mountRootFallback: true });
 

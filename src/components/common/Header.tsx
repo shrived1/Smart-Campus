@@ -11,6 +11,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import QRModal from './QRModal.js';
+import ThemeToggle from './ThemeToggle.js';
 
 interface HeaderProps {
   onToggleMobileMenu: () => void;
@@ -67,6 +68,9 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="text-slate-400">BLE Gateway:</span>
           <span className="text-[#00E5FF] font-mono font-medium">4 Nodes Active</span>
         </div>
+
+        {/* Theme Mode Switcher (Default Dark <-> High-Contrast Light) */}
+        <ThemeToggle />
 
         {/* Workflow QR Code Modal Button */}
         <button

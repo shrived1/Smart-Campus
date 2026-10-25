@@ -12,6 +12,7 @@ import {
   Download,
   GraduationCap
 } from 'lucide-react';
+import ThemeToggle from '../../components/common/ThemeToggle.js';
 
 export const AdmissionApplyPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -108,6 +109,7 @@ export const AdmissionApplyPage: React.FC = () => {
         </Link>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <Link
             to="/login"
             className="text-xs text-slate-300 hover:text-white py-1.5 px-3 rounded-lg border border-[#2a1e45] hover:bg-[#141021]"

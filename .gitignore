@@ -2,6 +2,7 @@ node_modules/
 build/
 dist/
 .server-dist/
+api/_app.js
 .vercel/
 coverage/
 .DS_Store

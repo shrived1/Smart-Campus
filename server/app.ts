@@ -22,17 +22,33 @@ export function createApp(options: CreateAppOptions = {}) {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-  // CORS & security headers (supports both same-origin Vercel/Node and separate API deployments)
+  // CORS & security headers (supports same-origin Vercel/Node, GitHub Pages static frontend, and custom origins)
+  const defaultAllowedOrigins = [
+    'https://smartcollage.vercel.app',
+    'https://shrived1.github.io',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+  ];
+
   app.use((req, res, next) => {
     const configuredOrigins = (process.env.CORS_ORIGIN || '')
       .split(',')
-      .map(o => o.trim())
+      .map(o => o.trim().replace(/\/+$/, ''))
       .filter(Boolean);
-    const requestOrigin = req.headers.origin;
+    const requestOrigin = req.headers.origin?.replace(/\/+$/, '');
 
     if (requestOrigin) {
-      if (configuredOrigins.length === 0 || configuredOrigins.includes('*') || configuredOrigins.includes(requestOrigin)) {
-        res.setHeader('Access-Control-Allow-Origin', requestOrigin);
+      const isAllowed =
+        configuredOrigins.includes('*') ||
+        defaultAllowedOrigins.includes(requestOrigin) ||
+        configuredOrigins.includes(requestOrigin) ||
+        (configuredOrigins.length === 0 &&
+          (requestOrigin.endsWith('.vercel.app') || requestOrigin.endsWith('.run.app')));
+
+      if (isAllowed) {
+        res.setHeader('Access-Control-Allow-Origin', req.headers.origin!);
         res.setHeader('Vary', 'Origin');
         res.setHeader('Access-Control-Allow-Credentials', 'true');
       }
@@ -40,6 +56,7 @@ export function createApp(options: CreateAppOptions = {}) {
 
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.setHeader('Access-Control-Max-Age', '86400');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-XSS-Protection', '1; mode=block');
 

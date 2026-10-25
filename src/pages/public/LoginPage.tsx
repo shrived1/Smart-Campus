@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.js';
 import { api } from '../../services/api.js';
+import type { UserRole } from '../../types/index.js';
 import { 
   Lock, 
   Mail, 
@@ -13,6 +14,7 @@ import {
   HelpCircle,
   X
 } from 'lucide-react';
+import ThemeToggle from '../../components/common/ThemeToggle.js';
 
 export const LoginPage: React.FC = () => {
   const [identifier, setIdentifier] = useState('');
@@ -24,22 +26,43 @@ export const LoginPage: React.FC = () => {
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotNotice, setForgotNotice] = useState<string | null>(null);
 
-  const { login } = useAuth();
+  const { login, demoLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const demoAccounts = [
-    { role: 'STUDENT', email: 'alex.rivers@smartcampus.edu', pass: 'Student@2026!', label: 'Student (Alex Rivers)' },
-    { role: 'FACULTY', email: 'prof.sharma@smartcampus.edu', pass: 'Faculty@2026!', label: 'Faculty (Dr. Sharma)' },
-    { role: 'PARENT', email: 'parent.rivers@smartcampus.edu', pass: 'Parent@2026!', label: 'Parent (Marcus Rivers)' },
-    { role: 'ADMISSION', email: 'admission.officer@smartcampus.edu', pass: 'Admission@2026!', label: 'Admission (Sarah J.)' },
-    { role: 'ADMIN', email: 'admin@smartcampus.edu', pass: 'Admin@2026!', label: 'System Admin (Dr. Vance)' }
+  const demoAccounts: Array<{ role: UserRole; email: string; label: string }> = [
+    { role: 'STUDENT', email: 'alex.rivers@smartcampus.edu', label: 'Student (Alex Rivers)' },
+    { role: 'FACULTY', email: 'prof.sharma@smartcampus.edu', label: 'Faculty (Dr. Sharma)' },
+    { role: 'PARENT', email: 'parent.rivers@smartcampus.edu', label: 'Parent (Marcus Rivers)' },
+    { role: 'ADMISSION', email: 'admission.officer@smartcampus.edu', label: 'Admission (Sarah J.)' },
+    { role: 'ADMIN', email: 'admin@smartcampus.edu', label: 'System Admin (Dr. Vance)' }
   ];
 
-  const handleQuickFill = (email: string, pass: string) => {
+  const resolveDestination = (serverRedirectUrl: string): string => {
+    const requestedPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
+    if (requestedPath && serverRedirectUrl) {
+      const portalPrefix = `/${serverRedirectUrl.split('/')[1]}/`;
+      if (requestedPath.startsWith(portalPrefix)) {
+        return requestedPath;
+      }
+    }
+    return serverRedirectUrl;
+  };
+
+  const handleQuickDemoAccess = async (role: UserRole, email: string) => {
     setIdentifier(email);
-    setPassword(pass);
+    setPassword('');
     setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const redirectUrl = await demoLogin(role);
+      navigate(resolveDestination(redirectUrl), { replace: true });
+    } catch (err: any) {
+      setError(err?.message || 'Unable to complete demo sign-in.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,11 +82,11 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       // Login returns the backend-authoritative redirect URL
-      const redirectUrl = await login(identifier, password);
+      const redirectUrl = await login(identifier.trim(), password);
       // Navigate to the server-determined destination
-      navigate(redirectUrl, { replace: true });
+      navigate(resolveDestination(redirectUrl), { replace: true });
     } catch (err: any) {
-      setError(err.message || 'Invalid credentials or inactive account.');
+      setError(err?.message || 'Authentication request failed. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -83,6 +106,11 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] text-slate-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative selection:bg-[#00E5FF]/30">
+      {/* Top-right theme switcher preserving login card layout */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
+        <ThemeToggle />
+      </div>
+
       {/* Background glow effects */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-[#3B0A6B]/25 blur-[120px] pointer-events-none rounded-full" />
 
@@ -198,8 +226,9 @@ export const LoginPage: React.FC = () => {
                 <button
                   key={acc.role}
                   type="button"
-                  onClick={() => handleQuickFill(acc.email, acc.pass)}
-                  className="p-2 text-left bg-[#050505] hover:bg-[#1c162f] border border-[#2a1e45] hover:border-[#3B0A6B] rounded-lg text-[11px] transition-all"
+                  disabled={isSubmitting}
+                  onClick={() => handleQuickDemoAccess(acc.role, acc.email)}
+                  className="p-2 text-left bg-[#050505] hover:bg-[#1c162f] border border-[#2a1e45] hover:border-[#3B0A6B] rounded-lg text-[11px] transition-all disabled:opacity-50"
                 >
                   <span className="font-semibold text-slate-200 block truncate">{acc.label}</span>
                   <span className="text-[10px] text-slate-400 block font-mono">{acc.role}</span>
