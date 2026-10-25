@@ -129,6 +129,48 @@ class Database {
         name: "Sarah Jenkins (Admissions)",
         isActive: true,
         createdAt: new Date().toISOString()
+      },
+      {
+        id: "usr-admission-naina",
+        email: "nainajadhav110@gmail.com",
+        passwordHash: hashPassword("Naina@12", salt),
+        salt,
+        role: "ADMISSION",
+        name: "Naina Jadhav",
+        isActive: true,
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "usr-faculty-shrived",
+        email: "shrivedschaware@gmail.com",
+        passwordHash: hashPassword("Shrived@12", salt),
+        salt,
+        role: "FACULTY",
+        name: "Prof. Shrived Chaware",
+        facultyId: "FAC-105",
+        isActive: true,
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "usr-student-piya",
+        email: "jadhavpiya30009@gmail.com",
+        passwordHash: hashPassword("Piya@12", salt),
+        salt,
+        role: "STUDENT",
+        name: "Piya Jadhav",
+        studentId: "STU-2023-112",
+        isActive: true,
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "usr-admin-shrived",
+        email: "shrivedc12@gmail.com",
+        passwordHash: hashPassword("Shrived@12", salt),
+        salt,
+        role: "ADMIN",
+        name: "Shrived Chaware (Admin)",
+        isActive: true,
+        createdAt: new Date().toISOString()
       }
     ];
 
@@ -193,6 +235,26 @@ class Database {
         parentPhone: "+1 (555) 765-4321",
         address: "512 Pinecrest Blvd, Campus Heights",
         admissionDate: "2023-08-15"
+      },
+      {
+        id: "STU-2023-112",
+        userId: "usr-student-piya",
+        rollNumber: "CS2023-112",
+        name: "Piya Jadhav",
+        email: "jadhavpiya30009@gmail.com",
+        phone: "+91 98765 43210",
+        department: "Computer Science & Engineering",
+        branch: "B.Tech Computer Science",
+        year: 3,
+        semester: 5,
+        section: "A",
+        academicYear: "2025-2026",
+        photograph: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+        bleMac: "DD:EE:FF:44:55:66",
+        parentName: "Rajesh Jadhav",
+        parentPhone: "+91 98765 11220",
+        address: "42 Knowledge Park Avenue, Campus Enclave",
+        admissionDate: "2023-08-15"
       }
     ];
 
@@ -221,6 +283,18 @@ class Database {
         assignedSubjects: ["CS503"],
         assignedClasses: ["CS-3A"],
         officeLocation: "CS Block, Room 212"
+      },
+      {
+        id: "FAC-105",
+        userId: "usr-faculty-shrived",
+        name: "Prof. Shrived Chaware",
+        email: "shrivedschaware@gmail.com",
+        phone: "+91 98230 55678",
+        department: "Computer Science & Engineering",
+        designation: "Associate Professor",
+        assignedSubjects: ["CS501", "CS505"],
+        assignedClasses: ["CS-3A", "CS-3B"],
+        officeLocation: "CS Block, Room 310"
       }
     ];
 
@@ -495,6 +569,40 @@ class Database {
         totalMinutesCampus: 485,
         verificationMethod: "BLE_ESP32",
         eventsCount: 3
+      },
+      {
+        id: "att-rec-piya-today",
+        studentId: "STU-2023-112",
+        date: today,
+        status: "PRESENT",
+        firstEntryTime: "08:46 AM",
+        lastExitTime: "04:20 PM",
+        totalMinutesCampus: 454,
+        verificationMethod: "BLE_ESP32",
+        eventsCount: 3,
+        notes: "Automated verification via ESP32-GATE-MAIN-01"
+      },
+      {
+        id: "att-rec-piya-d1",
+        studentId: "STU-2023-112",
+        date: "2026-10-23",
+        status: "PRESENT",
+        firstEntryTime: "08:41 AM",
+        lastExitTime: "04:25 PM",
+        totalMinutesCampus: 464,
+        verificationMethod: "BLE_ESP32",
+        eventsCount: 3
+      },
+      {
+        id: "att-rec-piya-d2",
+        studentId: "STU-2023-112",
+        date: "2026-10-22",
+        status: "PRESENT",
+        firstEntryTime: "08:52 AM",
+        lastExitTime: "04:10 PM",
+        totalMinutesCampus: 438,
+        verificationMethod: "BLE_ESP32",
+        eventsCount: 2
       }
     ];
 
@@ -543,6 +651,55 @@ class Database {
         attended: 35,
         percentage: 92.1,
         facultyName: "Dr. Clara O'Connor",
+        isLowAttendance: false
+      }
+    ]);
+
+    // Subject Attendance Summaries for Piya Jadhav
+    this.subjectAttendance.set("STU-2023-112", [
+      {
+        subjectCode: "CS501",
+        subjectName: "Design & Analysis of Algorithms",
+        totalConducted: 42,
+        attended: 39,
+        percentage: 92.9,
+        facultyName: "Prof. Shrived Chaware",
+        isLowAttendance: false
+      },
+      {
+        subjectCode: "CS502",
+        subjectName: "Operating Systems & Kernel Arch",
+        totalConducted: 40,
+        attended: 36,
+        percentage: 90.0,
+        facultyName: "Dr. Ramesh Sharma",
+        isLowAttendance: false
+      },
+      {
+        subjectCode: "CS503",
+        subjectName: "Database Management Systems",
+        totalConducted: 36,
+        attended: 32,
+        percentage: 88.9,
+        facultyName: "Prof. Priya Nair",
+        isLowAttendance: false
+      },
+      {
+        subjectCode: "CS504",
+        subjectName: "Computer Networks & Protocols",
+        totalConducted: 35,
+        attended: 30,
+        percentage: 85.7,
+        facultyName: "Prof. Alan Vance",
+        isLowAttendance: false
+      },
+      {
+        subjectCode: "CS505",
+        subjectName: "Machine Learning & Neural Networks",
+        totalConducted: 38,
+        attended: 36,
+        percentage: 94.7,
+        facultyName: "Prof. Shrived Chaware",
         isLowAttendance: false
       }
     ]);
@@ -717,6 +874,28 @@ class Database {
         issuedDate: "2025-08-14",
         status: "VERIFIED",
         verificationHash: "SHA256:11bb22cc33dd44ee55ff"
+      },
+      {
+        id: "doc-piya-01",
+        studentId: "STU-2023-112",
+        title: "Official Digital Student ID Card",
+        category: "ID_CARD",
+        fileName: "SmartCampus_ID_CS2023-112.pdf",
+        fileSize: "1.1 MB",
+        issuedDate: "2025-08-01",
+        status: "VERIFIED",
+        verificationHash: "SHA256:a1b2c3d4e5f60718293a"
+      },
+      {
+        id: "doc-piya-02",
+        studentId: "STU-2023-112",
+        title: "Bonafide Student Certificate (Academic Year 2025-26)",
+        category: "BONAFIDE",
+        fileName: "Bonafide_PiyaJadhav_2025-26.pdf",
+        fileSize: "820 KB",
+        issuedDate: "2025-09-12",
+        status: "VERIFIED",
+        verificationHash: "SHA256:4f5e6d7c8b9a01234567"
       }
     ];
 
@@ -754,6 +933,17 @@ class Database {
         verificationId: "SPRT-BADM-2026-104",
         badge: "Gold Trophy",
         description: "Secured first position representing AIST in state collegiate badminton invitational."
+      },
+      {
+        id: "cert-piya-01",
+        studentId: "STU-2023-112",
+        title: "Winner - Smart India Campus Innovation Challenge",
+        category: "Hackathon",
+        issuer: "AICTE & IEEE Student Chapter",
+        issueDate: "2026-02-20",
+        verificationId: "CERT-AICTE-2026-4410",
+        badge: "Gold Medalist",
+        description: "Designed an AI-assisted smart classroom attendance and academic analytics pipeline."
       }
     ];
 
@@ -781,6 +971,31 @@ class Database {
             method: "Online Bank Wire / ACH",
             transactionRef: "TXN-98421048-AIST",
             receiptNumber: "RCPT-2025-0842"
+          }
+        ]
+      },
+      {
+        id: "inv-piya-2025-5",
+        studentId: "STU-2023-112",
+        academicYear: "2025-2026",
+        semester: 5,
+        totalFee: 6250,
+        tuitionFee: 4800,
+        libraryFee: 350,
+        labFee: 800,
+        sportsFee: 300,
+        paidAmount: 6250,
+        pendingBalance: 0,
+        dueDate: "2026-11-30",
+        status: "PAID",
+        payments: [
+          {
+            id: "pay-piya-01",
+            date: "2025-08-10",
+            amount: 6250,
+            method: "Online Banking / UPI",
+            transactionRef: "TXN-77531902-AIST",
+            receiptNumber: "RCPT-2025-0915"
           }
         ]
       }
@@ -860,6 +1075,33 @@ class Database {
             status: "SUBMITTED"
           }
         ]
+      },
+      {
+        id: "asg-04",
+        subjectCode: "CS505",
+        subjectName: "Machine Learning & Neural Networks",
+        facultyId: "FAC-105",
+        facultyName: "Prof. Shrived Chaware",
+        classGroup: "CS-3A",
+        title: "Assignment 5: Convolutional Neural Network Feature Visualization",
+        instructions: "Train a compact CNN architecture and generate Grad-CAM activation maps across validation samples.",
+        issuedDate: "2026-10-21",
+        deadline: "2026-11-08",
+        maxMarks: 50,
+        allowedFormats: ["PDF", "ZIP"],
+        submissions: [
+          {
+            id: "sub-04",
+            assignmentId: "asg-04",
+            studentId: "STU-2023-112",
+            studentName: "Piya Jadhav",
+            rollNumber: "CS2023-112",
+            submittedAt: "2026-10-24T11:30:00.000Z",
+            fileName: "PiyaJadhav_CS505_GradCAM.pdf",
+            fileSize: "2.2 MB",
+            status: "SUBMITTED"
+          }
+        ]
       }
     ];
 
@@ -892,6 +1134,21 @@ class Database {
           { subjectCode: "CS503", subjectName: "Database Management Systems", credits: 3, internalMarks: 27, maxInternal: 30, theoryMarks: 62, maxTheory: 70, practicalMarks: 0, maxPractical: 0, total: 89, grade: "A" },
           { subjectCode: "CS504", subjectName: "Computer Networks & Protocols", credits: 3, internalMarks: 24, maxInternal: 30, theoryMarks: 54, maxTheory: 70, practicalMarks: 0, maxPractical: 0, total: 78, grade: "B+" },
           { subjectCode: "CS505", subjectName: "Machine Learning & Neural Networks", credits: 4, internalMarks: 30, maxInternal: 30, theoryMarks: 66, maxTheory: 70, practicalMarks: 0, maxPractical: 0, total: 96, grade: "O" }
+        ]
+      },
+      {
+        studentId: "STU-2023-112",
+        semester: 5,
+        academicYear: "2025-2026",
+        sgpa: 9.25,
+        cgpa: 9.18,
+        isPublished: true,
+        subjects: [
+          { subjectCode: "CS501", subjectName: "Design & Analysis of Algorithms", credits: 4, internalMarks: 29, maxInternal: 30, theoryMarks: 64, maxTheory: 70, practicalMarks: 0, maxPractical: 0, total: 93, grade: "O" },
+          { subjectCode: "CS502", subjectName: "Operating Systems", credits: 4, internalMarks: 28, maxInternal: 30, theoryMarks: 62, maxTheory: 70, practicalMarks: 0, maxPractical: 0, total: 90, grade: "A+" },
+          { subjectCode: "CS503", subjectName: "Database Management Systems", credits: 3, internalMarks: 28, maxInternal: 30, theoryMarks: 63, maxTheory: 70, practicalMarks: 0, maxPractical: 0, total: 91, grade: "A+" },
+          { subjectCode: "CS504", subjectName: "Computer Networks & Protocols", credits: 3, internalMarks: 27, maxInternal: 30, theoryMarks: 60, maxTheory: 70, practicalMarks: 0, maxPractical: 0, total: 87, grade: "A" },
+          { subjectCode: "CS505", subjectName: "Machine Learning & Neural Networks", credits: 4, internalMarks: 30, maxInternal: 30, theoryMarks: 67, maxTheory: 70, practicalMarks: 0, maxPractical: 0, total: 97, grade: "O" }
         ]
       }
     ];

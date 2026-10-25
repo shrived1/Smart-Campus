@@ -993,5 +993,73 @@ describe('Production API & Vercel Serverless Handler Integration Tests', () => {
     expect(cssContent).toContain('[data-theme="light"] .text-\\[\\#00E5FF\\]');
     expect(cssContent).toContain('[data-theme="light"] .bg-\\[\\#3B0A6B\\]');
   });
+
+  it('19. Authenticates configured Admission, Faculty, Student, and Admin accounts and enforces role portals', async () => {
+    const http = await import('http');
+    const { default: vercelApiHandler } = await import('../api/index.js');
+
+    const server = http.createServer(vercelApiHandler);
+    await new Promise<void>(resolve => server.listen(0, '127.0.0.1', () => resolve()));
+    const address = server.address();
+    const port = typeof address === 'object' && address ? address.port : 0;
+    const baseUrl = `http://127.0.0.1:${port}`;
+
+    try {
+      const configuredAccounts = [
+        {
+          email: 'nainajadhav110@gmail.com',
+          pass: 'Naina@12',
+          role: 'ADMISSION',
+          redirect: '/admission/dashboard',
+          verifyEndpoint: '/api/admission/applications',
+        },
+        {
+          email: 'shrivedschaware@gmail.com',
+          pass: 'Shrived@12',
+          role: 'FACULTY',
+          redirect: '/faculty/dashboard',
+          verifyEndpoint: '/api/faculty/overview',
+        },
+        {
+          email: 'jadhavpiya30009@gmail.com',
+          pass: 'Piya@12',
+          role: 'STUDENT',
+          redirect: '/student/dashboard',
+          verifyEndpoint: '/api/student/profile',
+        },
+        {
+          email: 'shrivedc12@gmail.com',
+          pass: 'Shrived@12',
+          role: 'ADMIN',
+          redirect: '/admin/dashboard',
+          verifyEndpoint: '/api/admin/overview',
+        },
+      ];
+
+      for (const acc of configuredAccounts) {
+        const loginRes = await fetch(`${baseUrl}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier: acc.email, password: acc.pass }),
+        });
+        expect(loginRes.status).toBe(200);
+        const loginData = await loginRes.json();
+        expect(loginData.success).toBe(true);
+        expect(loginData.user.email).toBe(acc.email);
+        expect(loginData.user.role).toBe(acc.role);
+        expect(loginData.redirectUrl).toBe(acc.redirect);
+        expect(loginData.token).toMatch(/^sctk_/);
+
+        // Verify role-protected portal endpoint succeeds with issued token
+        const portalRes = await fetch(`${baseUrl}${acc.verifyEndpoint}`, {
+          headers: { Authorization: `Bearer ${loginData.token}` },
+        });
+        expect(portalRes.status).toBe(200);
+      }
+    } finally {
+      await new Promise<void>(resolve => server.close(() => resolve()));
+    }
+  });
 });
+
 
