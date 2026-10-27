@@ -19,7 +19,8 @@ import type {
   StudentMarksRecord,
   CampusNotification,
   AuditLogEntry,
-  SystemSettings
+  SystemSettings,
+  ESP32ConnectionLog
 } from './types.js';
 
 // Password hasher using crypto SHA-256
@@ -55,6 +56,7 @@ class Database {
   marksRecords: StudentMarksRecord[] = [];
   notifications: CampusNotification[] = [];
   auditLogs: AuditLogEntry[] = [];
+  deviceLogs: ESP32ConnectionLog[] = [];
   settings: SystemSettings = {
     collegeName: "Apex Institute of Science & Technology",
     collegeShortCode: "AIST",
@@ -1224,6 +1226,55 @@ class Database {
         details: "Application SC-ADM-2026-7842 approved for Maya Lin (B.Tech CS & AI).",
         timestamp: "2026-10-18T11:20:00.000Z",
         ipAddress: "192.168.10.12"
+      }
+    ];
+
+    // 19. Initial ESP32 Hardware Connection & Telemetry Logs
+    const nowIso = new Date().toISOString();
+    this.deviceLogs = [
+      {
+        id: "log-dev-01",
+        nodeId: "ESP32-GATE-MAIN-01",
+        timestamp: nowIso,
+        level: "INFO",
+        eventType: "HEARTBEAT",
+        message: "ESP32 heartbeat acknowledged. RSSI: -54 dBm, Battery: 98%, Firmware: v2.4.1-BLE-PROD",
+        ipAddress: "192.168.10.41",
+        signalRssi: -54,
+        details: "Node operating nominally at Campus Main Gate - Turnstile 1"
+      },
+      {
+        id: "log-dev-02",
+        nodeId: "ESP32-GATE-MAIN-01",
+        timestamp: new Date(Date.now() - 15000).toISOString(),
+        level: "INFO",
+        eventType: "BLE_DETECTION",
+        message: "BLE Tag AA:BB:CC:11:22:33 detected (RSSI: -52 dBm). Student matched: Alex Rivers (CS2023-042)",
+        ipAddress: "192.168.10.41",
+        signalRssi: -52,
+        details: "Turnstile gate servo triggered for entry"
+      },
+      {
+        id: "log-dev-03",
+        nodeId: "ESP32-GATE-NORTH-02",
+        timestamp: new Date(Date.now() - 32000).toISOString(),
+        level: "INFO",
+        eventType: "HEARTBEAT",
+        message: "ESP32 heartbeat acknowledged. RSSI: -62 dBm, Battery: 95%, Firmware: v2.4.1-BLE-PROD",
+        ipAddress: "192.168.10.42",
+        signalRssi: -62,
+        details: "CS & Tech Block Entry Node healthy"
+      },
+      {
+        id: "log-dev-04",
+        nodeId: "ESP32-LIB-ENTRY-01",
+        timestamp: new Date(Date.now() - 48000).toISOString(),
+        level: "INFO",
+        eventType: "HEARTBEAT",
+        message: "ESP32 heartbeat acknowledged. RSSI: -68 dBm, Battery: 92%, Firmware: v2.4.0-BLE-PROD",
+        ipAddress: "192.168.10.44",
+        signalRssi: -68,
+        details: "Library Main Foyer node linked"
       }
     ];
   }

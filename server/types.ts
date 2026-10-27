@@ -354,3 +354,15 @@ export interface SystemPerformanceComparison {
   trafficGrowthPct: number;
 }
 
+export interface ESP32ConnectionLog {
+  id: string;
+  nodeId: string;
+  timestamp: string;
+  level: 'INFO' | 'WARNING' | 'ERROR';
+  eventType: 'HEARTBEAT' | 'BLE_DETECTION' | 'AUTH_FAILURE' | 'NETWORK_RETRY' | 'DEVICE_ERROR';
+  message: string;
+  ipAddress?: string;
+  signalRssi?: number;
+  details?: string;
+}
+

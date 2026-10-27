@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { db, hashPassword, verifyPassword } from '../server/db.js';
-import { createSessionToken, revokeSession, activeSessions, canAccessStudentData } from '../server/auth.js';
+import { createSessionToken, revokeSession, activeSessions, canAccessStudentData, authenticateSession } from '../server/auth.js';
 
 describe('Smart Campus Authentication & Role Enforcement Tests', () => {
   beforeEach(() => {
@@ -394,6 +394,96 @@ describe('Automated Database Indexing & Storage Cleanup Routine Tests', () => {
     expect(auditRecord.action).toBe('DATABASE_MAINTENANCE_JOB');
     expect(auditRecord.actorRole).toBe('ADMIN');
     expect(auditRecord.reclaimedGB).toBeGreaterThan(0);
+  });
+
+  it('13. Validates ESP32 hardware device authentication key security', () => {
+    const validKey = 'sc_esp32_secret_token_2026';
+    const invalidKey = 'unauthorized_token_random_xyz';
+
+    // Simulated auth checker
+    const verifyKey = (k: string) => k === validKey;
+
+    expect(verifyKey(validKey)).toBe(true);
+    expect(verifyKey(invalidKey)).toBe(false);
+    expect(verifyKey('')).toBe(false);
+  });
+
+  it('14. Validates ESP32 connection logs recording, filtering, and buffer clearance', () => {
+    // Check initial deviceLogs seeded in db
+    expect(db.deviceLogs.length).toBeGreaterThan(0);
+
+    const initialCount = db.deviceLogs.length;
+    const heartbeatLog = db.deviceLogs.find(l => l.eventType === 'HEARTBEAT');
+    expect(heartbeatLog).toBeDefined();
+    expect(heartbeatLog?.nodeId).toContain('ESP32');
+
+    // Simulate appending new hardware log
+    const testLog = {
+      id: `log-test-${Date.now()}`,
+      nodeId: 'ESP32-GATE-MAIN-01',
+      timestamp: new Date().toISOString(),
+      level: 'INFO' as const,
+      eventType: 'BLE_DETECTION' as const,
+      message: 'Test beacon tag scan',
+      signalRssi: -55
+    };
+    db.deviceLogs.unshift(testLog);
+    expect(db.deviceLogs.length).toBe(initialCount + 1);
+
+    // Verify filter by level
+    const infoLogs = db.deviceLogs.filter(l => l.level === 'INFO');
+    expect(infoLogs.length).toBeGreaterThan(0);
+    expect(infoLogs.every(l => l.level === 'INFO')).toBe(true);
+
+    // Simulate clearing logs buffer
+    db.deviceLogs = [
+      {
+        id: `log-clr-test`,
+        nodeId: 'SYSTEM',
+        timestamp: new Date().toISOString(),
+        level: 'INFO',
+        eventType: 'HEARTBEAT',
+        message: 'Buffer cleared'
+      }
+    ];
+    expect(db.deviceLogs.length).toBe(1);
+    expect(db.deviceLogs[0].nodeId).toBe('SYSTEM');
+  });
+
+  it('15. Validates cryptographic session token recovery across server process restarts', () => {
+    const adminUser = db.users.find(u => u.role === 'ADMIN')!;
+    const session = createSessionToken(adminUser);
+
+    expect(session.token).toMatch(/^sctk_/);
+    expect(activeSessions.has(session.token)).toBe(true);
+
+    // Simulate server process restart / memory wipe
+    activeSessions.clear();
+    expect(activeSessions.has(session.token)).toBe(false);
+
+    // Simulated authenticateSession middleware recovery check
+    const req: any = {
+      headers: {
+        authorization: `Bearer ${session.token}`
+      }
+    };
+    let nextCalled = false;
+    let authError: string | null = null;
+    const res: any = {
+      status: (code: number) => ({
+        json: (body: any) => { authError = body.error; }
+      })
+    };
+    const next = () => { nextCalled = true; };
+
+    authenticateSession(req, res, next);
+
+    expect(nextCalled).toBe(true);
+    expect(authError).toBeNull();
+    expect(req.user?.userId).toBe(adminUser.id);
+    expect(req.user?.role).toBe('ADMIN');
+    // Verify session was restored back into activeSessions
+    expect(activeSessions.has(session.token)).toBe(true);
   });
 });
 

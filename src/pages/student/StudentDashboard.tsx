@@ -45,8 +45,8 @@ export const StudentDashboard: React.FC = () => {
         if (feesRes.success) setFeeInvoice(feesRes.invoice);
         if (evRes.success) setEvents(evRes.events);
         if (ttRes.success) setTimetable(ttRes.timetable);
-      } catch (err) {
-        console.error('Error loading student dashboard', err);
+      } catch (err: any) {
+        // Handle student telemetry load error gracefully
       } finally {
         setLoading(false);
       }

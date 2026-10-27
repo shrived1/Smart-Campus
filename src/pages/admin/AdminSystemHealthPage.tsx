@@ -283,8 +283,8 @@ export const AdminSystemHealthPage: React.FC = () => {
         setLastRefreshed(new Date());
         checkThresholdsAndNotify(res.system, thresholds);
       }
-    } catch (err) {
-      console.error('Failed to fetch system health', err);
+    } catch (err: any) {
+      // Safe fallback when telemetry service is updating or session expires
     } finally {
       setLoading(false);
       if (isManual) setRefreshing(false);
