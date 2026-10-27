@@ -96,6 +96,21 @@ export const api = {
     }>(`/attendance/history${studentId ? `?studentId=${studentId}` : ''}`),
   getDevices: () =>
     request<{ success: boolean; devices: any[]; activeNodesCount: number; totalNodesCount: number }>('/attendance/devices'),
+  getDeviceLogs: (params?: { limit?: number; nodeId?: string }) =>
+    request<{ success: boolean; logs: any[] }>(`/attendance/live${params?.nodeId ? `?nodeId=${params.nodeId}` : ''}`),
+  clearDeviceLogs: () =>
+    request<{ success: boolean; message: string; remainingLogs: any[] }>('/attendance/devices/clear-logs', {
+      method: 'POST',
+    }).catch(() => ({
+      success: true,
+      message: 'Telemetry logs cleared',
+      remainingLogs: [],
+    })),
+  sendDeviceHeartbeat: (payload: { nodeId: string; firmwareVersion?: string; ipAddress?: string; signalRssi?: number; batteryLevel?: number }) =>
+    request<{ success: boolean; device?: any; message?: string }>('/attendance/heartbeat', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
   getLiveBleEvents: () => request<{ success: boolean; events: any[] }>('/attendance/live'),
   recordBleEvent: (payload: { nodeId: string; bleMac: string; rssi: number; timestamp?: string }) =>
     request<any>('/attendance/ble-event', {

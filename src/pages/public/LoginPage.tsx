@@ -2,16 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.js';
 import { api } from '../../services/api.js';
-import type { UserRole } from '../../types/index.js';
 import { 
   Lock, 
   Mail, 
   Eye, 
   EyeOff, 
   ArrowRight, 
-  ShieldCheck, 
   AlertCircle,
-  HelpCircle,
   X
 } from 'lucide-react';
 import ThemeToggle from '../../components/common/ThemeToggle.js';
@@ -26,17 +23,9 @@ export const LoginPage: React.FC = () => {
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotNotice, setForgotNotice] = useState<string | null>(null);
 
-  const { login, demoLogin } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
-  const demoAccounts: Array<{ role: UserRole; email: string; label: string }> = [
-    { role: 'STUDENT', email: 'alex.rivers@smartcampus.edu', label: 'Student (Alex Rivers)' },
-    { role: 'FACULTY', email: 'prof.sharma@smartcampus.edu', label: 'Faculty (Dr. Sharma)' },
-    { role: 'PARENT', email: 'parent.rivers@smartcampus.edu', label: 'Parent (Marcus Rivers)' },
-    { role: 'ADMISSION', email: 'admission.officer@smartcampus.edu', label: 'Admission (Sarah J.)' },
-    { role: 'ADMIN', email: 'admin@smartcampus.edu', label: 'System Admin (Dr. Vance)' }
-  ];
 
   const resolveDestination = (serverRedirectUrl: string): string => {
     const requestedPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
@@ -47,22 +36,6 @@ export const LoginPage: React.FC = () => {
       }
     }
     return serverRedirectUrl;
-  };
-
-  const handleQuickDemoAccess = async (role: UserRole, email: string) => {
-    setIdentifier(email);
-    setPassword('');
-    setError(null);
-    setIsSubmitting(true);
-
-    try {
-      const redirectUrl = await demoLogin(role);
-      navigate(resolveDestination(redirectUrl), { replace: true });
-    } catch (err: any) {
-      setError(err?.message || 'Unable to complete demo sign-in.');
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -214,28 +187,6 @@ export const LoginPage: React.FC = () => {
               )}
             </button>
           </form>
-
-          {/* Quick-Fill Demo Switcher for fast evaluation */}
-          <div className="pt-4 border-t border-[#2a1e45]">
-            <p className="text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
-              <span>Quick Test Any Portal:</span>
-              <span className="text-[10px] text-[#00E5FF] font-sans">1-Click Fill</span>
-            </p>
-            <div className="grid grid-cols-2 gap-1.5">
-              {demoAccounts.map(acc => (
-                <button
-                  key={acc.role}
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={() => handleQuickDemoAccess(acc.role, acc.email)}
-                  className="p-2 text-left bg-[#050505] hover:bg-[#1c162f] border border-[#2a1e45] hover:border-[#3B0A6B] rounded-lg text-[11px] transition-all disabled:opacity-50"
-                >
-                  <span className="font-semibold text-slate-200 block truncate">{acc.label}</span>
-                  <span className="text-[10px] text-slate-400 block font-mono">{acc.role}</span>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
         <p className="text-center text-xs text-slate-400 mt-6">
